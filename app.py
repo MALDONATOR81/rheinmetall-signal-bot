@@ -126,3 +126,33 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+from flask import Flask, request, abort
+
+app = Flask(__name__)
+
+@app.get("/")
+def home():
+    return {"status": "ok", "service": "rheinmetall-signal-bot"}
+
+@app.post("/tv")
+def tv_webhook():
+    secret = os.getenv("TV_WEBHOOK_SECRET")
+    if secret and request.headers.get("X-TRADINGVIEW-SECRET") != secret:
+        abort(401)
+
+    p = request.get_json(silent=True) or {}
+    sym = p.get("symbol") or "?"
+    price = p.get("price") or "?"
+    sig = (p.get("signal") or "ALERTA").upper()
+    tf  = p.get("tf") or "?"
+    ts  = p.get("time") or ""
+
+    msg = f"🔔 {sym} {sig} @ {price} ({tf})\n⏱ {ts}"
+    send_telegram(msg)
+    return {"ok": True}
+
+if __name__ == "__main__":
+    # si corres localmente
+    main()   # ejecuta tu lógica normal
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "10000")))

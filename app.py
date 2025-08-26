@@ -5,6 +5,17 @@ import pandas as pd
 import yfinance as yf
 from indicators import ema, rsi
 
+# --- PING INICIO ---
+import os, requests, datetime as dt
+def _ping():
+    t, c = os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
+    if t and c:
+        requests.get(f"https://api.telegram.org/bot{t}/sendMessage",
+                     params={"chat_id": c, "text": f"✅ Cron ejecutado {dt.datetime.utcnow().isoformat()}Z"})
+# Llama al ping al arrancar:
+_ping()
+# --- FIN PING ---
+
 # Variables de entorno (en Render las pondrás en Environment)
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
